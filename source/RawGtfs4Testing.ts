@@ -1,7 +1,7 @@
-import { RawGtfs } from "../RawGtfs";
+import { RawGtfs } from "./RawGtfs";
 
 
-export class TestRawGtfs extends RawGtfs {
+export class RawGtfs4Testing extends RawGtfs {
   public test_getAgencyCardinality() {
     return this.agencyCardinality;
   }

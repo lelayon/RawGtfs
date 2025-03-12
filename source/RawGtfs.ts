@@ -595,20 +595,20 @@ export class RawGtfs {
     return this.feedInfo;
   }
 
-  public getFeedStartDate() {
-    return this.feedInfo[GtfsFeedInfoField.FeedStartDate];
-  }
-
   public setFeedStartDate(feedStartDate: string) {
     this.feedInfo[GtfsFeedInfoField.FeedStartDate] = feedStartDate;
   }
 
-  public getFeedEndDate() {
-    return this.feedInfo[GtfsFeedInfoField.FeedEndDate];
+  public getFeedStartDate() {
+    return this.feedInfo[GtfsFeedInfoField.FeedStartDate];
   }
 
   public setFeedEndDate(feedEndDate: string) {
     this.feedInfo[GtfsFeedInfoField.FeedEndDate] = feedEndDate;
+  }
+
+  public getFeedEndDate() {
+    return this.feedInfo[GtfsFeedInfoField.FeedEndDate];
   }
 
   public setFeedVersion(feedVersion: string) {

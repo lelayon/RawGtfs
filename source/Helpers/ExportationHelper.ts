@@ -10,6 +10,7 @@ import {
   GtfsCalendarFileName,
   GtfsCalendarDateFileName,
   GtfsFeedInfoFileName,
+  GtfsItem,
 } from "../RawGtfsTypes";
 import * as fs from "fs";
 import * as path from "path";
@@ -26,28 +27,27 @@ export class ExportationHelper {
       }
     }
     
-
-    private static buildFilesByFileName(gtfs: RawGtfs) {
+    protected static buildFilesByFileName(gtfs: RawGtfs) {
       return {
-        [GtfsAgencyFileName]: this.convertArrayToCsv(gtfs.buildArrayOfAgencies(), GtfsFileName.Agency),
-        [GtfsStopFileName]: this.convertArrayToCsv(gtfs.buildArrayOfStops(), GtfsFileName.Stop),
-        [GtfsRouteFileName]: this.convertArrayToCsv(gtfs.buildArrayOfRoutes(), GtfsFileName.Route),
-        [GtfsTripFileName]: this.convertArrayToCsv(gtfs.buildArrayOfTrips(), GtfsFileName.Trip),
-        [GtfsStopTimeFileName]: this.convertArrayToCsv(gtfs.buildArrayOfStopTimes(), GtfsFileName.StopTime),
-        [GtfsCalendarFileName]: this.convertArrayToCsv(gtfs.buildArrayOfCalendars(), GtfsFileName.Calendar),
-        [GtfsCalendarDateFileName]: this.convertArrayToCsv(gtfs.buildArrayOfCalendarDates(), GtfsFileName.CalendarDate),
-        [GtfsFeedInfoFileName]: this.convertArrayToCsv([gtfs.getFeedInfo()], GtfsFileName.FeedInfo),
+        [GtfsAgencyFileName]: this.convertArrayOfItemsToCsv(gtfs.buildArrayOfAgencies(), GtfsFileName.Agency),
+        [GtfsStopFileName]: this.convertArrayOfItemsToCsv(gtfs.buildArrayOfStops(), GtfsFileName.Stop),
+        [GtfsRouteFileName]: this.convertArrayOfItemsToCsv(gtfs.buildArrayOfRoutes(), GtfsFileName.Route),
+        [GtfsTripFileName]: this.convertArrayOfItemsToCsv(gtfs.buildArrayOfTrips(), GtfsFileName.Trip),
+        [GtfsStopTimeFileName]: this.convertArrayOfItemsToCsv(gtfs.buildArrayOfStopTimes(), GtfsFileName.StopTime),
+        [GtfsCalendarFileName]: this.convertArrayOfItemsToCsv(gtfs.buildArrayOfCalendars(), GtfsFileName.Calendar),
+        [GtfsCalendarDateFileName]: this.convertArrayOfItemsToCsv(gtfs.buildArrayOfCalendarDates(), GtfsFileName.CalendarDate),
+        [GtfsFeedInfoFileName]: this.convertArrayOfItemsToCsv([gtfs.getFeedInfo()], GtfsFileName.FeedInfo),
       }
     }
 
-    private static convertArrayToCsv(array: any[], fileName: GtfsFileName) {
+    protected static convertArrayOfItemsToCsv(arrayOfItems: GtfsItem[], fileName: GtfsFileName) {
       const headers = GtfsFieldsByFileName[fileName];
-      const rows = array.map(item => headers.map(header => this.escapeValue(item[header], item)).join(",")).join("\n");
+      const rows = arrayOfItems.map(item => headers.map(header => this.escapeValue(item[header])).join(",")).join("\n");
 
       return headers.join(",") + "\n" + rows;
     }
 
-    private static escapeValue(value: string | undefined, item: any) {
+    protected static escapeValue(value: string | undefined) {
       if (value === null || value === undefined || value === "") {
         return "";
       }

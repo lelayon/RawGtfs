@@ -2,7 +2,7 @@ import { RawGtfs } from "./RawGtfs";
 import { GtfsAgencyCardinality, GtfsCalendarField, GtfsFeedInfoField, GtfsStopField } from "./RawGtfsTypes";
 import { describe, expect } from '@jest/globals';
 import { TestFactory } from "./TestHelpers/TestFactory";
-import { TestRawGtfs } from "./TestHelpers/TestRawGtfs";
+import { RawGtfs4Testing } from "./RawGtfs4Testing";
 
 describe("Test RawGtfs Class", () => {
   it("should create a new RawGtfs instance", () => {
@@ -14,7 +14,7 @@ describe("Test RawGtfs Class", () => {
   describe("Test agency.txt related functions", () => {
     describe("Test setAgency", () => {
       it("Set an agency when cardinality is Absent", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         expect(gtfs.test_getAgencyCardinality()).toBe(GtfsAgencyCardinality.Absent);
         expect(gtfs.getNumberOfAgencies()).toBe(0);
 
@@ -24,7 +24,7 @@ describe("Test RawGtfs Class", () => {
       });
 
       it("Set an agency when cardinality is Singleton", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const agencyId1 = "agency_id_1";
         const agencyId2 = "agency_id_2";
       
@@ -39,7 +39,7 @@ describe("Test RawGtfs Class", () => {
       });
 
       it("Set an agency when cardinality is Multiple", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const agencyId1 = "agency_id_1";
         const agencyId2 = "agency_id_2";
         const agencyId3 = "agency_id_3";
@@ -57,7 +57,7 @@ describe("Test RawGtfs Class", () => {
 
     describe("Test getAgency", () => {
       it("Get an agency when cardinality is Singleton", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const agencyId = "agency_id_1";
         gtfs.setAgency(TestFactory.createAgency({ agency_id: agencyId }));
         expect(gtfs.test_getAgencyCardinality()).toBe(GtfsAgencyCardinality.Singleton);
@@ -71,7 +71,7 @@ describe("Test RawGtfs Class", () => {
       });
 
       it("Get an agency when cardinality is Multiple", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const agencyId1 = "agency_id_1";
         const agencyId2 = "agency_id_2";
         gtfs.setAgency(TestFactory.createAgency({ agency_id: agencyId1 }));
@@ -90,14 +90,14 @@ describe("Test RawGtfs Class", () => {
 
     describe("Test getNumberOfAgencies", () => {
       it("Get the number of agencies when cardinality is Absent", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         expect(gtfs.getNumberOfAgencies()).toBe(0);
       });
     });
 
     describe("Test buildArrayOfAgencies", () => {
       it("Build an array of agencies when cardinality is Singleton", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const agencyId = "agency_id_1";
         const agency = TestFactory.createAgency({ agency_id: agencyId });
         gtfs.setAgency(agency);
@@ -105,7 +105,7 @@ describe("Test RawGtfs Class", () => {
       });
 
       it("Build an array of agencies when cardinality is Multiple", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const agencyId1 = "agency_id_1";
         const agencyId2 = "agency_id_2";
         const agency1 = TestFactory.createAgency({ agency_id: agencyId1 });
@@ -117,7 +117,7 @@ describe("Test RawGtfs Class", () => {
 
     describe("Test updateAgency", () => {
       it("Update an agency when cardinality is Singleton", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const agencyId = "agency_id_1";
         const originalAgencyName = "Original Agency Name";
         const originalAgency = TestFactory.createAgency({ agency_id: agencyId, agency_name: originalAgencyName });
@@ -140,7 +140,7 @@ describe("Test RawGtfs Class", () => {
       });
 
       it("Update an agency when cardinality is Multiple", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const agencyId1 = "agency_id_1";
         const agencyId2 = "agency_id_2";
         const originalAgencyName1 = "Original Agency Name 1";
@@ -983,7 +983,7 @@ describe("Test RawGtfs Class", () => {
         const newServiceId1 = "new_service_id_1";
         const newCalendar1 = {...calendar1, [GtfsCalendarField.ServiceId]: newServiceId1};
         gtfs.updateCalendarServiceIdWithoutUpdatingReferences(serviceId1, newServiceId1);
-        console.log(gtfs.buildArrayOfCalendars())
+
         expect(gtfs.buildArrayOfCalendars()).toEqual([calendar2, newCalendar1]);
         expect(gtfs.getCalendar(serviceId1)).toBeUndefined();
         expect(gtfs.getCalendar(newServiceId1)).toEqual(calendar1);
@@ -1164,7 +1164,7 @@ describe("Test RawGtfs Class", () => {
   describe("Test feed_info.txt related functions", () => {
     describe("Test getFeedInfo", () => {
       it("Get the feed info", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const feedInfo = gtfs.getFeedInfo();
         expect(feedInfo?.[GtfsFeedInfoField.FeedPublisherName]).toEqual(gtfs.test_getDefaultFeedPublisherName());
         expect(feedInfo?.[GtfsFeedInfoField.FeedPublisherUrl]).toEqual(gtfs.test_getDefaultFeedPublisherUrl());
@@ -1174,7 +1174,7 @@ describe("Test RawGtfs Class", () => {
 
     describe("Test setFeedStartDate", () => {
       it("Set the feed start date", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const feedStartDate = "20250101";
         gtfs.setFeedStartDate(feedStartDate);
         expect(gtfs.getFeedStartDate()).toEqual(feedStartDate);
@@ -1183,7 +1183,7 @@ describe("Test RawGtfs Class", () => {
 
     describe("Test getFeedStartDate", () => {
       it("Get the feed start date", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const feedStartDate = "20250101";
         gtfs.setFeedStartDate(feedStartDate);
         expect(gtfs.getFeedStartDate()).toEqual(feedStartDate);
@@ -1192,7 +1192,7 @@ describe("Test RawGtfs Class", () => {
 
     describe("Test setFeedEndDate", () => {
       it("Set the feed end date", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const feedEndDate = "20251231";
         gtfs.setFeedEndDate(feedEndDate);
         expect(gtfs.getFeedEndDate()).toEqual(feedEndDate);
@@ -1201,7 +1201,7 @@ describe("Test RawGtfs Class", () => {
 
     describe("Test getFeedEndDate", () => {
       it("Get the feed end date", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const feedEndDate = "20251231";
         gtfs.setFeedEndDate(feedEndDate);
         expect(gtfs.getFeedEndDate()).toEqual(feedEndDate);
@@ -1210,7 +1210,7 @@ describe("Test RawGtfs Class", () => {
 
     describe("Test setFeedVersion", () => {
       it("Set the feed version", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const feedVersion = "1.0";
         gtfs.setFeedVersion(feedVersion);
         expect(gtfs.getFeedVersion()).toEqual(feedVersion);
@@ -1219,7 +1219,7 @@ describe("Test RawGtfs Class", () => {
 
     describe("Test getFeedVersion", () => {
       it("Get the feed version", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const feedVersion = "1.0";
         gtfs.setFeedVersion(feedVersion);
         expect(gtfs.getFeedVersion()).toEqual(feedVersion);
@@ -1228,7 +1228,7 @@ describe("Test RawGtfs Class", () => {
 
     describe("Test setFeedContactUrl", () => {
       it("Set the feed contact url", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const feedContactUrl = "http://test.com";
         gtfs.setFeedContactUrl(feedContactUrl);
         expect(gtfs.getFeedContactUrl()).toEqual(feedContactUrl);
@@ -1237,7 +1237,7 @@ describe("Test RawGtfs Class", () => {
 
     describe("Test getFeedContactUrl", () => {
       it("Get the feed contact url", () => {
-        const gtfs = new TestRawGtfs();
+        const gtfs = new RawGtfs4Testing();
         const feedContactUrl = "http://test.com";
         gtfs.setFeedContactUrl(feedContactUrl);
         expect(gtfs.getFeedContactUrl()).toEqual(feedContactUrl);

@@ -57,7 +57,7 @@ export enum GtfsStopField {
   PlatformCode = "platform_code",
 }
 
-const GtfsStopFields = Object.values(GtfsStopField);
+export const GtfsStopFields = Object.values(GtfsStopField);
 
 export interface GtfsStop {
   [GtfsStopField.StopId]: string;
@@ -98,7 +98,7 @@ export enum GtfsRouteField {
   NetworkId = "network_id",
 }
 
-const GtfsRouteFields = Object.values(GtfsRouteField);
+export const GtfsRouteFields = Object.values(GtfsRouteField);
 
 export enum GtfsRouteType {
   Tram = '0',
@@ -148,7 +148,7 @@ export enum GtfsTripField {
   BikesAllowed = "bikes_allowed",
 }
 
-const GtfsTripFields = Object.values(GtfsTripField);
+export const GtfsTripFields = Object.values(GtfsTripField);
 
 export interface GtfsTrip {
   [GtfsTripField.RouteId]: string;
@@ -190,7 +190,7 @@ export enum GtfsStopTimeField {
   DropOffBookingRuleId = "drop_off_booking_rule_id",
 }
 
-const GtfsStopTimeFields = Object.values(GtfsStopTimeField);
+export const GtfsStopTimeFields = Object.values(GtfsStopTimeField);
 
 export enum GtfsStopTimePickupType {
   RegularlyScheduled = '0',
@@ -246,7 +246,7 @@ export enum GtfsCalendarField {
   EndDate = "end_date",
 }
 
-const GtfsCalendarFields = Object.values(GtfsCalendarField);
+export const GtfsCalendarFields = Object.values(GtfsCalendarField);
 
 export enum GtfsServiceAvailability {
   Available = '1',
@@ -283,7 +283,7 @@ export enum GtfsCalendarDateField {
   ExceptionType = "exception_type",
 }
 
-const GtfsCalendarDateFields = Object.values(GtfsCalendarDateField);
+export const GtfsCalendarDateFields = Object.values(GtfsCalendarDateField);
 
 export interface GtfsCalendarDate {
   [GtfsCalendarDateField.ServiceId]: string;
@@ -305,7 +305,7 @@ export enum GtfsShapeField {
   ShapeDistTraveled = "shape_dist_traveled",
 }
 
-const GtfsShapeFields = Object.values(GtfsShapeField);
+export const GtfsShapeFields = Object.values(GtfsShapeField);
 
 export interface GtfsShape {
   [GtfsShapeField.ShapeId]: string;
@@ -333,7 +333,7 @@ export enum GtfsFeedInfoField {
   FeedContactUrl = "feed_contact_url",
   }
 
-const GtfsFeedInfoFields = Object.values(GtfsFeedInfoField);
+export const GtfsFeedInfoFields = Object.values(GtfsFeedInfoField);
 
 export interface GtfsFeedInfo {
   [GtfsFeedInfoField.FeedPublisherName]: string;
