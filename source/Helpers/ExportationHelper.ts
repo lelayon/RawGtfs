@@ -21,7 +21,7 @@ export class ExportationHelper {
 
       for (const fileName in fileByFileName) {
         const fullPath = path.join(folderPath, fileName);
-        // const filePath = path.dirname(fullPath);
+
         fs.writeFileSync(fullPath, fileByFileName[fileName]);
       }
     }
@@ -29,13 +29,13 @@ export class ExportationHelper {
 
     private static buildFilesByFileName(gtfs: RawGtfs) {
       return {
-        [GtfsAgencyFileName]: this.convertArrayToCsv(gtfs.exportAgencies(), GtfsFileName.Agency),
+        [GtfsAgencyFileName]: this.convertArrayToCsv(gtfs.buildArrayOfAgencies(), GtfsFileName.Agency),
         [GtfsStopFileName]: this.convertArrayToCsv(gtfs.buildArrayOfStops(), GtfsFileName.Stop),
-        [GtfsRouteFileName]: this.convertArrayToCsv(gtfs.exportRoutes(), GtfsFileName.Route),
-        [GtfsTripFileName]: this.convertArrayToCsv(gtfs.exportTrips(), GtfsFileName.Trip),
-        [GtfsStopTimeFileName]: this.convertArrayToCsv(gtfs.exportStopTimes(), GtfsFileName.StopTime),
-        [GtfsCalendarFileName]: this.convertArrayToCsv(gtfs.exportCalendars(), GtfsFileName.Calendar),
-        [GtfsCalendarDateFileName]: this.convertArrayToCsv(gtfs.exportCalendarDates(), GtfsFileName.CalendarDate),
+        [GtfsRouteFileName]: this.convertArrayToCsv(gtfs.buildArrayOfRoutes(), GtfsFileName.Route),
+        [GtfsTripFileName]: this.convertArrayToCsv(gtfs.buildArrayOfTrips(), GtfsFileName.Trip),
+        [GtfsStopTimeFileName]: this.convertArrayToCsv(gtfs.buildArrayOfStopTimes(), GtfsFileName.StopTime),
+        [GtfsCalendarFileName]: this.convertArrayToCsv(gtfs.buildArrayOfCalendars(), GtfsFileName.Calendar),
+        [GtfsCalendarDateFileName]: this.convertArrayToCsv(gtfs.buildArrayOfCalendarDates(), GtfsFileName.CalendarDate),
         [GtfsFeedInfoFileName]: this.convertArrayToCsv([gtfs.getFeedInfo()], GtfsFileName.FeedInfo),
       }
     }
@@ -51,7 +51,7 @@ export class ExportationHelper {
       if (value === null || value === undefined || value === "") {
         return "";
       }
-      // console.log(value, item)
+
       if (value.includes(",") || value.includes("\n") || value.includes("\"") || value.includes("'")) {
         return `"${value.replace(/"/g, '""')}"`;
       }

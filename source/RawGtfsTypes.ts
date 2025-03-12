@@ -192,6 +192,20 @@ export enum GtfsStopTimeField {
 
 const GtfsStopTimeFields = Object.values(GtfsStopTimeField);
 
+export enum GtfsStopTimePickupType {
+  RegularlyScheduled = '0',
+  NotAvailable = '1',
+  Phone = '2',
+  Coordinate = '3',
+}
+
+export enum GtfsStopTimeDropOffType {
+  RegularlyScheduled = '0',
+  NotAvailable = '1',
+  Phone = '2',
+  Coordinate = '3',
+}
+
 export interface GtfsStopTime {
   [GtfsStopTimeField.TripId]: string;
   [GtfsStopTimeField.ArrivalTime]: string;
@@ -203,8 +217,8 @@ export interface GtfsStopTime {
   [GtfsStopTimeField.StopHeadsign]?: string;
   [GtfsStopTimeField.StartPickupDropOffWindow]?: string;
   [GtfsStopTimeField.EndPickupDropOffWindow]?: string;
-  [GtfsStopTimeField.PickupType]?: string;
-  [GtfsStopTimeField.DropOffType]?: string;
+  [GtfsStopTimeField.PickupType]?: GtfsStopTimePickupType;
+  [GtfsStopTimeField.DropOffType]?: GtfsStopTimeDropOffType;
   [GtfsStopTimeField.ContinuousPickup]?: string;
   [GtfsStopTimeField.ContinuousDropOff]?: string;
   [GtfsStopTimeField.ShapeDistTraveled]?: string;

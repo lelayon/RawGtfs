@@ -24,7 +24,7 @@ import {
 } from "./RawGtfsTypes";
 
 export class RawGtfs {
-  private agencyCardinality: GtfsAgencyCardinality;
+  protected agencyCardinality: GtfsAgencyCardinality;
   private agency?: GtfsAgency;
   private agencyByAgencyId?: Map<string, GtfsAgency>;
   private readonly stopByStopId: Map<string, GtfsStop>;
@@ -106,6 +106,12 @@ export class RawGtfs {
     }
   }
 
+  public setAgencies(agencies: GtfsAgency[]) {
+    for (const agency of agencies) {
+      this.setAgency(agency);
+    }
+  }
+
   public getAgency(agencyId?: string): GtfsAgency | undefined {
     switch (this.agencyCardinality) {
       case GtfsAgencyCardinality.Absent:
@@ -137,7 +143,7 @@ export class RawGtfs {
     }
   }
 
-  public exportAgencies() {
+  public buildArrayOfAgencies() {
     switch (this.agencyCardinality) {
       case GtfsAgencyCardinality.Absent:
         return [];
@@ -173,35 +179,6 @@ export class RawGtfs {
     }
   }
 
-  public deleteAgencyWithoutDeletingReferences(agencyId?: string) {
-    switch (this.agencyCardinality) {
-      case GtfsAgencyCardinality.Absent:
-        break;
-      case GtfsAgencyCardinality.Singleton:
-        if (this.agency && this.agency[GtfsAgencyField.AgencyId] === agencyId) {
-          this.agency = undefined;
-          this.agencyCardinality = GtfsAgencyCardinality.Absent;
-        }
-        break;
-      case GtfsAgencyCardinality.Multiple:
-        if (!agencyId) {
-          throw new Error("Agency cardinality is multiple, must provide agencyId");
-        }
-        if (!this.agencyByAgencyId) {
-          throw new Error("Agency cardinality is multiple, agencyByAgencyId should be set");
-        }
-        this.agencyByAgencyId.delete(agencyId);
-
-        if (this.agencyByAgencyId.size === 1) {
-          this.agencyCardinality = GtfsAgencyCardinality.Singleton;
-          this.agency = this.agencyByAgencyId.values().next().value;
-          this.agencyByAgencyId = undefined;
-        }
-
-        break;
-    }
-  }
-
   /**
    * stops.txt related functions
    */
@@ -232,8 +209,8 @@ export class RawGtfs {
     }
   }
 
-  public deleteStopWithoutDeletingReferences(stopId: string) {
-    this.stopByStopId.delete(stopId);
+  public deleteStopWithoutDeletingReferences(stop: GtfsStop) {
+    this.stopByStopId.delete(stop[GtfsStopField.StopId]);
   }
 
   /**
@@ -252,7 +229,7 @@ export class RawGtfs {
     return this.routeByRouteId.size;
   }
 
-  public exportRoutes() {
+  public buildArrayOfRoutes() {
     return Array.from(this.routeByRouteId.values());
   }
 
@@ -266,12 +243,8 @@ export class RawGtfs {
     }
   }
 
-  public deleteRouteWithoutDeletingReferences(route: GtfsRoute) {
-    this.deleteRouteIdWithoutDeletingReferences(route[GtfsRouteField.RouteId]);
-  }
-
-  public deleteRouteIdWithoutDeletingReferences(routeId: string) {
-    this.routeByRouteId.delete(routeId);
+  public deleteRouteWithoutDeletingReferences(partialRoute: GtfsRoute | {[GtfsRouteField.RouteId]: string}) {
+    this.routeByRouteId.delete(partialRoute[GtfsRouteField.RouteId]);
   }
 
   /**
@@ -290,7 +263,7 @@ export class RawGtfs {
     return this.tripByTripId.size;
   }
 
-  public exportTrips() {
+  public buildArrayOfTrips() {
     return Array.from(this.tripByTripId.values());
   }
 
@@ -302,12 +275,8 @@ export class RawGtfs {
     }
   }
 
-  public deleteTripWithoutDeletingReferences(trip: GtfsTrip) {
-    this.deleteTripIdWithoutDeletingReferences(trip[GtfsTripField.TripId]);
-  }
-
-  public deleteTripIdWithoutDeletingReferences(tripId: string) {
-    this.tripByTripId.delete(tripId);
+  public deleteTripWithoutDeletingReferences(partialTrip: GtfsTrip | {[GtfsTripField.TripId]: string}) {
+    this.tripByTripId.delete(partialTrip[GtfsTripField.TripId]);
   }
 
   /**
@@ -329,12 +298,16 @@ export class RawGtfs {
     return this.stopTimeByStopSequenceByTripId.get(tripId)?.get(stopSequence);
   }
 
-  public getStopTimesOfTrip(tripId: string) {
-    return this.stopTimeByStopSequenceByTripId.get(tripId);
+  public buildArrayOfStopTimesOfTripId(tripId: string) {
+    return Array.from(this.stopTimeByStopSequenceByTripId.get(tripId)?.values() || []);
+  }
+
+  public buildArrayOfStopTimesOfTrip(partialTrip: GtfsTrip | {[GtfsTripField.TripId]: string}) {
+    return this.buildArrayOfStopTimesOfTripId(partialTrip[GtfsTripField.TripId]);
   }
 
   public buildOrderedStopTimesOfTrip(tripId: string) {
-    const stopTimes = this.getStopTimesOfTrip(tripId);
+    const stopTimes = this.buildArrayOfStopTimesOfTripId(tripId);
     if (stopTimes) {
       return Array.from(stopTimes.values()).sort((a, b) => Number(a[GtfsStopTimeField.StopSequence]) - Number(b[GtfsStopTimeField.StopSequence]));
     }
@@ -351,7 +324,7 @@ export class RawGtfs {
     return numberOfStopTimes;
   }
 
-  public exportStopTimes() {
+  public buildArrayOfStopTimes() {
     const stopTimes: GtfsStopTime[] = [];
 
     for (const tripId of this.stopTimeByStopSequenceByTripId.keys()) {
@@ -453,7 +426,7 @@ export class RawGtfs {
     return this.calendarByServiceId.get(serviceId);
   }
 
-  public exportCalendars() {
+  public buildArrayOfCalendars() {
     return Array.from(this.calendarByServiceId.values());
   }
 
@@ -493,7 +466,7 @@ export class RawGtfs {
     return this.calendarDateByDateByServiceId.get(serviceId)?.get(date);
   }
 
-  public exportCalendarDates() {
+  public buildArrayOfCalendarDates() {
     const calendarDates: GtfsCalendarDate[] = [];
 
     for (const serviceId of this.calendarDateByDateByServiceId.keys()) {
