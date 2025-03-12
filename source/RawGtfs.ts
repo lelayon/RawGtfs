@@ -25,6 +25,10 @@ import {
 
 export class RawGtfs {
   protected agencyCardinality: GtfsAgencyCardinality;
+  protected readonly defaultFeedPublisherName: string = "Placeholder publisher name";
+  protected readonly defaultFeedPublisherUrl: string = "http://placeholder-publisher-url.com";
+  protected readonly defaultFeedLang: string = "en";
+
   private agency?: GtfsAgency;
   private agencyByAgencyId?: Map<string, GtfsAgency>;
   private readonly stopByStopId: Map<string, GtfsStop>;
@@ -294,6 +298,12 @@ export class RawGtfs {
     this.stopTimeByStopSequenceByTripId.get(tripId)?.set(stopSequence, stopTime);
   }  
 
+  public setStopTimes(stopTimes: GtfsStopTime[]) {
+    for (const stopTime of stopTimes) {
+      this.setStopTime(stopTime);
+    }
+  }
+
   public getStopTime(tripId: string, stopSequence: string) {
     return this.stopTimeByStopSequenceByTripId.get(tripId)?.get(stopSequence);
   }
@@ -306,12 +316,16 @@ export class RawGtfs {
     return this.buildArrayOfStopTimesOfTripId(partialTrip[GtfsTripField.TripId]);
   }
 
-  public buildOrderedStopTimesOfTrip(tripId: string) {
+  public buildOrderedStopTimesOfTripId(tripId: string) {
     const stopTimes = this.buildArrayOfStopTimesOfTripId(tripId);
     if (stopTimes) {
       return Array.from(stopTimes.values()).sort((a, b) => Number(a[GtfsStopTimeField.StopSequence]) - Number(b[GtfsStopTimeField.StopSequence]));
     }
     return [];
+  }
+
+  public buildOrderedStopTimesOfTrip(partialTrip: GtfsTrip | {[GtfsTripField.TripId]: string}) {
+    return this.buildOrderedStopTimesOfTripId(partialTrip[GtfsTripField.TripId]);
   }
 
   public getNumberOfStopTimes() {
@@ -387,7 +401,7 @@ export class RawGtfs {
   }
 
   public reindexStopTimesOfTripId(tripId: string) {
-    const stopTimes = this.buildOrderedStopTimesOfTrip(tripId);
+    const stopTimes = this.buildOrderedStopTimesOfTripId(tripId);
 
     if (stopTimes && stopTimes.length > 0) {
       this.deleteStopTimesOfTripIdWithoutDeletingReferences(tripId);
@@ -406,8 +420,14 @@ export class RawGtfs {
     this.calendarByServiceId.set(calendar[GtfsCalendarField.ServiceId], calendar);
   }
 
-  public setEverydayCalendar(partialCalendar: Partial<GtfsCalendar>) {
-    this.setCalendar({
+  public setCalendars(calendars: GtfsCalendar[]) {
+    for (const calendar of calendars) {
+      this.setCalendar(calendar);
+    }
+  }
+
+  public setAndGetEverydayCalendar(partialCalendar: Partial<GtfsCalendar>) {
+    const everydayCalendar = {
       [GtfsCalendarField.ServiceId]: "everyday",
       [GtfsCalendarField.Monday]: GtfsServiceAvailability.Available,
       [GtfsCalendarField.Tuesday]: GtfsServiceAvailability.Available,
@@ -419,11 +439,19 @@ export class RawGtfs {
       [GtfsCalendarField.StartDate]: "20250101",
       [GtfsCalendarField.EndDate]: "21241231",
       ...partialCalendar,
-    });
+    };
+
+    this.setCalendar(everydayCalendar);
+
+    return everydayCalendar;
   }
 
   public getCalendar(serviceId: string) {
     return this.calendarByServiceId.get(serviceId);
+  }
+
+  public getNumberOfCalendars() {
+    return this.calendarByServiceId.size;
   }
 
   public buildArrayOfCalendars() {
@@ -462,8 +490,18 @@ export class RawGtfs {
     this.calendarDateByDateByServiceId.get(serviceId)?.set(date, calendarDate);
   }
 
+  public setCalendarDates(calendarDates: GtfsCalendarDate[]) {
+    for (const calendarDate of calendarDates) {
+      this.setCalendarDate(calendarDate);
+    }
+  }
+
   public getCalendarDate(serviceId: string, date: string) {
     return this.calendarDateByDateByServiceId.get(serviceId)?.get(date);
+  }
+
+  public getNumberOfCalendarDates() {
+    return this.calendarDateByDateByServiceId.size;
   }
 
   public buildArrayOfCalendarDates() {
@@ -520,8 +558,22 @@ export class RawGtfs {
     this.shapePointByShapeId.set(shapePoint[GtfsShapeField.ShapeId], shapePoint);
   }
 
+  public setShapePoints(shapePoints: GtfsShape[]) {
+    for (const shapePoint of shapePoints) {
+      this.setShapePoint(shapePoint);
+    }
+  }
+
   public getShapePoint(shapeId: string) {
     return this.shapePointByShapeId.get(shapeId);
+  }
+
+  public getNumberOfShapePoints() {
+    return this.shapePointByShapeId.size;
+  }
+
+  public buildArrayOfShapePoints() {
+    return Array.from(this.shapePointByShapeId.values());
   }
 
   /**

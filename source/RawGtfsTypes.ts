@@ -272,7 +272,7 @@ export interface GtfsCalendar {
 
 export const GtfsCalendarDateFileName = "calendar_dates.txt";
 
-export enum GtfsExceptionType {
+export enum GtfsCalendarDateExceptionType {
   Added = '1',
   Removed = '2',
 }
@@ -288,7 +288,7 @@ const GtfsCalendarDateFields = Object.values(GtfsCalendarDateField);
 export interface GtfsCalendarDate {
   [GtfsCalendarDateField.ServiceId]: string;
   [GtfsCalendarDateField.Date]: string;
-  [GtfsCalendarDateField.ExceptionType]: GtfsExceptionType;
+  [GtfsCalendarDateField.ExceptionType]: GtfsCalendarDateExceptionType;
 }
 
 /**

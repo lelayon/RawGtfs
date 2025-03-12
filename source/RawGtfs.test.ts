@@ -1,7 +1,8 @@
-import { TestFactory, TestRawGtfs } from "./Helpers/TestFactory";
 import { RawGtfs } from "./RawGtfs";
-import { GtfsAgencyCardinality, GtfsStopField } from "./RawGtfsTypes";
-import {describe, expect, test} from '@jest/globals';
+import { GtfsAgencyCardinality, GtfsCalendarField, GtfsFeedInfoField, GtfsStopField } from "./RawGtfsTypes";
+import { describe, expect } from '@jest/globals';
+import { TestFactory } from "./TestHelpers/TestFactory";
+import { TestRawGtfs } from "./TestHelpers/TestRawGtfs";
 
 describe("Test RawGtfs Class", () => {
   it("should create a new RawGtfs instance", () => {
@@ -14,11 +15,11 @@ describe("Test RawGtfs Class", () => {
     describe("Test setAgency", () => {
       it("Set an agency when cardinality is Absent", () => {
         const gtfs = new TestRawGtfs();
-        expect(gtfs.getAgencyCardinality()).toBe(GtfsAgencyCardinality.Absent);
+        expect(gtfs.test_getAgencyCardinality()).toBe(GtfsAgencyCardinality.Absent);
         expect(gtfs.getNumberOfAgencies()).toBe(0);
 
         gtfs.setAgency(TestFactory.createAgency());
-        expect(gtfs.getAgencyCardinality()).toBe(GtfsAgencyCardinality.Singleton);
+        expect(gtfs.test_getAgencyCardinality()).toBe(GtfsAgencyCardinality.Singleton);
         expect(gtfs.getNumberOfAgencies()).toBe(1);
       });
 
@@ -30,11 +31,11 @@ describe("Test RawGtfs Class", () => {
         
         gtfs.setAgency(TestFactory.createAgency({ agency_id: agencyId1 }));
         expect(gtfs.getNumberOfAgencies()).toBe(1);
-        expect(gtfs.getAgencyCardinality()).toBe(GtfsAgencyCardinality.Singleton);
+        expect(gtfs.test_getAgencyCardinality()).toBe(GtfsAgencyCardinality.Singleton);
 
         gtfs.setAgency(TestFactory.createAgency({ agency_id: agencyId2 }));
         expect(gtfs.getNumberOfAgencies()).toBe(2);
-        expect(gtfs.getAgencyCardinality()).toBe(GtfsAgencyCardinality.Multiple);
+        expect(gtfs.test_getAgencyCardinality()).toBe(GtfsAgencyCardinality.Multiple);
       });
 
       it("Set an agency when cardinality is Multiple", () => {
@@ -46,11 +47,11 @@ describe("Test RawGtfs Class", () => {
         gtfs.setAgency(TestFactory.createAgency({ agency_id: agencyId1 }));
         gtfs.setAgency(TestFactory.createAgency({ agency_id: agencyId2 }));
         expect(gtfs.getNumberOfAgencies()).toBe(2);
-        expect(gtfs.getAgencyCardinality()).toBe(GtfsAgencyCardinality.Multiple);
+        expect(gtfs.test_getAgencyCardinality()).toBe(GtfsAgencyCardinality.Multiple);
 
         gtfs.setAgency(TestFactory.createAgency({ agency_id: agencyId3 }));
         expect(gtfs.getNumberOfAgencies()).toBe(3);
-        expect(gtfs.getAgencyCardinality()).toBe(GtfsAgencyCardinality.Multiple);
+        expect(gtfs.test_getAgencyCardinality()).toBe(GtfsAgencyCardinality.Multiple);
       });
     });
 
@@ -59,7 +60,7 @@ describe("Test RawGtfs Class", () => {
         const gtfs = new TestRawGtfs();
         const agencyId = "agency_id_1";
         gtfs.setAgency(TestFactory.createAgency({ agency_id: agencyId }));
-        expect(gtfs.getAgencyCardinality()).toBe(GtfsAgencyCardinality.Singleton);
+        expect(gtfs.test_getAgencyCardinality()).toBe(GtfsAgencyCardinality.Singleton);
 
         const agency = gtfs.getAgency();
         expect(agency).toBeDefined();
@@ -76,7 +77,7 @@ describe("Test RawGtfs Class", () => {
         gtfs.setAgency(TestFactory.createAgency({ agency_id: agencyId1 }));
         gtfs.setAgency(TestFactory.createAgency({ agency_id: agencyId2 }));
         expect(gtfs.getNumberOfAgencies()).toBe(2);
-        expect(gtfs.getAgencyCardinality()).toBe(GtfsAgencyCardinality.Multiple);
+        expect(gtfs.test_getAgencyCardinality()).toBe(GtfsAgencyCardinality.Multiple);
 
         const agency = gtfs.getAgency(agencyId1);
         expect(agency).toBeDefined();
@@ -121,13 +122,13 @@ describe("Test RawGtfs Class", () => {
         const originalAgencyName = "Original Agency Name";
         const originalAgency = TestFactory.createAgency({ agency_id: agencyId, agency_name: originalAgencyName });
         gtfs.setAgency(originalAgency);
-        expect(gtfs.getAgencyCardinality()).toBe(GtfsAgencyCardinality.Singleton);
+        expect(gtfs.test_getAgencyCardinality()).toBe(GtfsAgencyCardinality.Singleton);
         expect(gtfs.getNumberOfAgencies()).toBe(1);
 
         const updatedAgencyName = "Updated Agency Name";
         const updatedAgency = TestFactory.createAgency({ agency_id: agencyId, agency_name: updatedAgencyName });
         gtfs.updateAgency(updatedAgency);
-        expect(gtfs.getAgencyCardinality()).toBe(GtfsAgencyCardinality.Singleton);
+        expect(gtfs.test_getAgencyCardinality()).toBe(GtfsAgencyCardinality.Singleton);
         expect(gtfs.getNumberOfAgencies()).toBe(1);
 
         const agency = gtfs.getAgency();
@@ -147,7 +148,7 @@ describe("Test RawGtfs Class", () => {
         const originalAgency1 = TestFactory.createAgency({ agency_id: agencyId1, agency_name: originalAgencyName1 });
         const originalAgency2 = TestFactory.createAgency({ agency_id: agencyId2, agency_name: originalAgencyName2 });
         gtfs.setAgencies([originalAgency1, originalAgency2]);
-        expect(gtfs.getAgencyCardinality()).toBe(GtfsAgencyCardinality.Multiple);
+        expect(gtfs.test_getAgencyCardinality()).toBe(GtfsAgencyCardinality.Multiple);
         expect(gtfs.getNumberOfAgencies()).toBe(2);
 
         const updatedAgencyName1 = "Updated Agency Name 1";
@@ -608,14 +609,26 @@ describe("Test RawGtfs Class", () => {
         const gtfs = new RawGtfs();
         const tripId1 = "trip_id_1";
         const stopId1 = "stop_id_1";
-        const stopTime1 = TestFactory.createStopTime({ trip_id: tripId1, stop_id: stopId1 });
-        gtfs.setStopTime(stopTime1);
+        TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId1, stop_id: stopId1 });
         expect(gtfs.getNumberOfStopTimes()).toBe(1);
 
         const tripId2 = "trip_id_2";
         const stopId2 = "stop_id_2";
-        const stopTime2 = TestFactory.createStopTime({ trip_id: tripId2, stop_id: stopId2 });
-        gtfs.setStopTime(stopTime2);
+        TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId2, stop_id: stopId2 });
+        expect(gtfs.getNumberOfStopTimes()).toBe(2);
+      });
+    });
+
+    describe("Test setStopTimes", () => {
+      it("Set stop times where there are no stop times", () => {
+        const gtfs = new RawGtfs();
+        expect(gtfs.getNumberOfStopTimes()).toBe(0);
+
+        const stopSequence1 = "1";
+        const stopTime1 = TestFactory.createStopTime({ stop_sequence: stopSequence1 });
+        const stopSequence2 = "2";
+        const stopTime2 = TestFactory.createStopTime({ stop_sequence: stopSequence2 });
+        gtfs.setStopTimes([stopTime1, stopTime2]);
         expect(gtfs.getNumberOfStopTimes()).toBe(2);
       });
     });
@@ -625,8 +638,7 @@ describe("Test RawGtfs Class", () => {
         const gtfs = new RawGtfs();
         const tripId = "trip_id_1";
         const stopSequence = "1";
-        const stopTimeToSet = TestFactory.createStopTime({ trip_id: tripId, stop_sequence: stopSequence });
-        gtfs.setStopTime(stopTimeToSet);
+        const stopTimeToSet = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId, stop_sequence: stopSequence });
         expect(gtfs.getNumberOfStopTimes()).toBe(1);
 
         const stopTime = gtfs.getStopTime(tripId, stopSequence);
@@ -652,19 +664,15 @@ describe("Test RawGtfs Class", () => {
         const tripId1 = "trip_id_1";
         const stopSequence11 = "1";
         const stopSequence12 = "2";
-        const stopTime11 = TestFactory.createStopTime({ trip_id: tripId1, stop_sequence: stopSequence11 });
-        const stopTime12 = TestFactory.createStopTime({ trip_id: tripId1, stop_sequence: stopSequence12 });
-        gtfs.setStopTime(stopTime11);
-        gtfs.setStopTime(stopTime12);
+        const stopTime11 = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId1, stop_sequence: stopSequence11 });
+        const stopTime12 = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId1, stop_sequence: stopSequence12 });
         expect(gtfs.buildArrayOfStopTimesOfTripId(tripId1)).toEqual([stopTime11, stopTime12]);
 
         const tripId2 = "trip_id_2";
         const stopSequence21 = "1";
         const stopSequence22 = "2";
-        const stopTime21 = TestFactory.createStopTime({ trip_id: tripId2, stop_sequence: stopSequence21 });
-        const stopTime22 = TestFactory.createStopTime({ trip_id: tripId2, stop_sequence: stopSequence22 });
-        gtfs.setStopTime(stopTime21);
-        gtfs.setStopTime(stopTime22);
+        const stopTime21 = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId2, stop_sequence: stopSequence21 });
+        const stopTime22 = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId2, stop_sequence: stopSequence22 });
 
         expect(gtfs.buildArrayOfStopTimesOfTripId(tripId1)).toEqual([stopTime11, stopTime12]);
         expect(gtfs.buildArrayOfStopTimesOfTripId(tripId2)).toEqual([stopTime21, stopTime22]);
@@ -682,10 +690,8 @@ describe("Test RawGtfs Class", () => {
         const tripId2 = "trip_id_2";
         const stopSequence11 = "1";
         const stopSequence12 = "2";
-        const stopTime11 = TestFactory.createStopTime({ trip_id: tripId1, stop_sequence: stopSequence11 });
-        const stopTime12 = TestFactory.createStopTime({ trip_id: tripId1, stop_sequence: stopSequence12 });
-        gtfs.setStopTime(stopTime11);
-        gtfs.setStopTime(stopTime12);
+        TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId1, stop_sequence: stopSequence11 });
+        TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId1, stop_sequence: stopSequence12 });
 
         expect(gtfs.buildArrayOfStopTimesOfTripId(tripId2)).toEqual([]);
       });
@@ -695,10 +701,24 @@ describe("Test RawGtfs Class", () => {
       it("Build an array of stop times of a trip", () => {
         const gtfs = new RawGtfs();
         const tripId = "trip_id_1";
-        const stopTime12 = TestFactory.createStopTime({ trip_id: tripId });
-        gtfs.setStopTime(stopTime12);
+        const stopTime12 = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId });
 
         expect(gtfs.buildArrayOfStopTimesOfTrip({trip_id: tripId})).toEqual([stopTime12]);
+      });
+    });
+
+    describe("Test buildOrderedStopTimesOfTripId", () => {
+      it("Build an ordered array of stop times of a trip", () => {
+        const gtfs = new RawGtfs();
+        const tripId = "trip_id_1";
+        const stopSequence12 = "2";
+        const stopTime12 = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId, stop_sequence: stopSequence12 });
+
+        const stopSequence11 = "1";
+        const stopTime11 = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId, stop_sequence: stopSequence11 });
+
+        expect(gtfs.buildArrayOfStopTimesOfTripId(tripId)).toEqual([stopTime12, stopTime11]);
+        expect(gtfs.buildOrderedStopTimesOfTripId(tripId)).toEqual([stopTime11, stopTime12]);
       });
     });
 
@@ -707,19 +727,521 @@ describe("Test RawGtfs Class", () => {
         const gtfs = new RawGtfs();
         const tripId = "trip_id_1";
         const stopSequence12 = "2";
-        const stopTime12 = TestFactory.createStopTime({ trip_id: tripId, stop_sequence: stopSequence12 });
-        gtfs.setStopTime(stopTime12);
+        const stopTime12 = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId, stop_sequence: stopSequence12 });
 
         const stopSequence11 = "1";
-        const stopTime11 = TestFactory.createStopTime({ trip_id: tripId, stop_sequence: stopSequence11 });
-        gtfs.setStopTime(stopTime11);
+        const stopTime11 = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId, stop_sequence: stopSequence11 });
 
-        expect(gtfs.buildArrayOfStopTimesOfTripId(tripId)).toEqual([stopTime12, stopTime11]);
-        expect(gtfs.buildOrderedStopTimesOfTrip(tripId)).toEqual([stopTime11, stopTime12]);
+        expect(gtfs.buildArrayOfStopTimesOfTrip({trip_id: tripId})).toEqual([stopTime12, stopTime11]);
+        expect(gtfs.buildOrderedStopTimesOfTrip({trip_id: tripId})).toEqual([stopTime11, stopTime12]);
+      });
+    });
+
+    describe("Test getNumberOfStopTimes", () => {
+      it("Get the number of stop times when there are stop times", () => {
+        const gtfs = new RawGtfs();
+        expect(gtfs.getNumberOfStopTimes()).toBe(0);
+      });
+
+      it("Get the number of stop times when there are stop times", () => {
+        const gtfs = new RawGtfs();
+        const tripId = "trip_id_1";
+        const stopSequence = "1";
+        TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId, stop_sequence: stopSequence });
+        expect(gtfs.getNumberOfStopTimes()).toBe(1);
+      });
+    });
+
+    describe("Test buildArrayOfStopTimes", () => {
+      it("When there are no stop times", () => {
+        const gtfs = new RawGtfs();
+        expect(gtfs.buildArrayOfStopTimes()).toEqual([]);
+      });
+
+      it("When there are stop times", () => {
+        const gtfs = new RawGtfs();
+        const tripId = "trip_id_1";
+        const stopSequence1 = "1";
+        const stopSequence2 = "2";
+        const stopTime1 = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId, stop_sequence: stopSequence1 });
+        const stopTime2 = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId, stop_sequence: stopSequence2 });
+       
+        expect(gtfs.buildArrayOfStopTimes()).toEqual([stopTime1, stopTime2]);
+      });
+    });
+
+    describe("Test updateStopTimesTripIdWithoutUpdatingReferences", () => {
+      it("Update a stop time trip id without updating references", () => {
+        const gtfs = new RawGtfs();
+        const tripId1 = "trip_id_1";
+        const stopSequence = "1";
+        const stopTime = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId1, stop_sequence: stopSequence });
+        expect(gtfs.getNumberOfStopTimes()).toBe(1);
+        expect(gtfs.getStopTime(tripId1, stopSequence)?.trip_id).toEqual(tripId1);
+
+        const tripId2 = "trip_id_2";
+        gtfs.updateStopTimesTripIdWithoutUpdatingReferences(tripId1, tripId2);
+        expect(gtfs.getNumberOfStopTimes()).toBe(1);
+        expect(gtfs.getStopTime(tripId1, stopSequence)).toBeUndefined();
+        expect(gtfs.getStopTime(tripId2, stopSequence)?.trip_id).toEqual(tripId2);
+      });
+    });
+
+    describe("Test updateStopTimeStopSequenceWithoutUpdatingReferences", () => {
+      it("Update a stop time stop sequence without updating references", () => {
+        const gtfs = new RawGtfs();
+        const tripId = "trip_id_1";
+        const stopSequence1 = "1";
+        const stopTime1 = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId, stop_sequence: stopSequence1 });
+        expect(gtfs.getNumberOfStopTimes()).toBe(1);
+        expect(gtfs.getStopTime(tripId, stopSequence1)?.stop_sequence).toEqual(stopSequence1);
+
+        const stopSequence2 = "2";
+        gtfs.updateStopTimeStopSequenceWithoutUpdatingReferences(tripId, stopSequence1, stopSequence2);
+        expect(gtfs.getNumberOfStopTimes()).toBe(1);
+        expect(gtfs.getStopTime(tripId, stopSequence1)).toBeUndefined();
+        expect(gtfs.getStopTime(tripId, stopSequence2)?.stop_sequence).toEqual(stopSequence2);
+      });
+    });
+
+    describe("Test deleteStopTimeWithoutDeletingReferences", () => {
+      it("Delete a stop time without deleting references", () => {
+        const gtfs = new RawGtfs();
+        const tripId = "trip_id_1";
+        const stopSequence = "1";
+        const stopTime = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId, stop_sequence: stopSequence });
+        expect(gtfs.getNumberOfStopTimes()).toBe(1);
+        expect(gtfs.getStopTime(tripId, stopSequence)?.trip_id).toEqual(tripId);
+
+        gtfs.deleteStopTimeWithoutDeletingReferences(stopTime);
+        expect(gtfs.getNumberOfStopTimes()).toBe(0);
+        expect(gtfs.getStopTime(tripId, stopSequence)).toBeUndefined();
+      });
+
+      it("Delete a stop time without deleting references when the stop time does not exist", () => {
+        const gtfs = new RawGtfs();
+        const tripId = "trip_id_1";
+        const stopSequence = "1";
+        expect(gtfs.getNumberOfStopTimes()).toBe(0);
+        const stopTime = TestFactory.createStopTime({ trip_id: tripId, stop_sequence: stopSequence });
+        gtfs.deleteStopTimeWithoutDeletingReferences(stopTime);
+        expect(gtfs.getNumberOfStopTimes()).toBe(0);
+      });
+    });
+
+    describe("Test deleteStopTimesOfTripIdWithoutDeletingReferences", () => {
+      it("When there are a few stop times with that trip id", () => {
+        const gtfs = new RawGtfs();
+        const tripId1 = "trip_id_1";
+        const stopSequence11 = "1";
+        const stopSequence12 = "2";
+        TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId1, stop_sequence: stopSequence11 });
+        TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId1, stop_sequence: stopSequence12 });
+        expect(gtfs.getNumberOfStopTimes()).toBe(2);
+
+        const tripId2 = "trip_id_2";
+        const stopSequence21 = "1";
+        const stopSequence22 = "2";
+        const stopTime21 = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId2, stop_sequence: stopSequence21 });
+        const stopTime22 = TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId2, stop_sequence: stopSequence22 });
+        expect(gtfs.getNumberOfStopTimes()).toBe(4);
+
+        gtfs.deleteStopTimesOfTripIdWithoutDeletingReferences(tripId1);
+        expect(gtfs.getNumberOfStopTimes()).toBe(2);
+        expect(gtfs.getStopTime(tripId1, stopSequence11)).toBeUndefined();
+        expect(gtfs.getStopTime(tripId1, stopSequence12)).toBeUndefined();
+        expect(gtfs.getStopTime(tripId2, stopSequence21)).toEqual(stopTime21);
+        expect(gtfs.getStopTime(tripId2, stopSequence22)).toEqual(stopTime22);  
+      });
+
+      it("When there are no stop times with that trip id", () => {
+        const gtfs = new RawGtfs();
+        const tripId = "trip_id_1";
+        expect(gtfs.getNumberOfStopTimes()).toBe(0);
+        gtfs.deleteStopTimesOfTripIdWithoutDeletingReferences(tripId);
+        expect(gtfs.getNumberOfStopTimes()).toBe(0);
+      });
+    });
+
+    describe("Test reindexStopTimesOfTripId", () => {
+      it("Reindex the stop times of a trip id", () => {
+        const gtfs = new RawGtfs();
+        const tripId = "trip_id_1";
+        const stopSequence11 = "11";
+        const stopSequence22 = "22";
+        TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId, stop_sequence: stopSequence11 });
+        TestFactory.createAndSetStopTime(gtfs, { trip_id: tripId, stop_sequence: stopSequence22 });
+        expect(gtfs.getNumberOfStopTimes()).toBe(2);
+        const [stopTime11, stopTime22] = gtfs.buildOrderedStopTimesOfTripId(tripId);
+        expect(stopTime11.stop_sequence).toEqual(stopSequence11);
+        expect(stopTime22.stop_sequence).toEqual(stopSequence22);
+
+        gtfs.reindexStopTimesOfTripId(tripId);
+
+        const [stopTime1, stopTime2] = gtfs.buildOrderedStopTimesOfTripId(tripId);
+        expect(stopTime1.stop_sequence).toEqual("1");
+        expect(stopTime2.stop_sequence).toEqual("2");
       });
     });
   });
 
+  describe("Test calendar.txt related functions", () => {
+    describe("Test setCalendar", () => {
+      it("Set a calendar where there are no calendars", () => {
+        const gtfs = new RawGtfs();
+        const serviceId = "service_id_1";
+        const calendar = TestFactory.createAndSetCalendar(gtfs, { service_id: serviceId });
+        expect(gtfs.getCalendar(serviceId)).toEqual(calendar);
+      });
 
+      it("Set a calendar where there is already a calendar with the same service id", () => {
+        const gtfs = new RawGtfs();
+        const serviceId = "service_id_1";
+        const endOf2025 = "20251231";
+        TestFactory.createAndSetCalendar(gtfs, { service_id: serviceId, end_date: endOf2025 });
+        expect(gtfs.getNumberOfCalendars()).toBe(1);
+        expect(gtfs.getCalendar(serviceId)?.[GtfsCalendarField.EndDate]).toEqual(endOf2025);
 
+        const endOf2026 = "20261231";
+        TestFactory.createAndSetCalendar(gtfs, { service_id: serviceId, end_date: endOf2026 });
+        expect(gtfs.getNumberOfCalendars()).toBe(1);
+        expect(gtfs.getCalendar(serviceId)?.[GtfsCalendarField.EndDate]).toEqual(endOf2026);
+      });
+    });
+
+    describe("Test setCalendars", () => {
+      it("Set a calendar where there are no calendars", () => {
+        const gtfs = new RawGtfs();
+        const calendars = [
+          TestFactory.createCalendar({ service_id: "service_id_1" }),
+          TestFactory.createCalendar({ service_id: "service_id_2" })
+        ];
+        gtfs.setCalendars(calendars);
+        expect(gtfs.getNumberOfCalendars()).toBe(2);
+        expect(gtfs.getCalendar("service_id_1")).toEqual(calendars[0]);
+        expect(gtfs.getCalendar("service_id_2")).toEqual(calendars[1]);
+      });
+    });
+
+    describe("Test setEverydayCalendar", () => {
+      it("Set an everyday calendar", () => {
+        const gtfs = new RawGtfs();
+        const serviceId = "service_id_1";
+        const everydayCalendar = gtfs.setAndGetEverydayCalendar({ service_id: serviceId });
+        expect(everydayCalendar).toEqual(gtfs.getCalendar(serviceId));
+      });
+    });
+
+    describe("Test getCalendar", () => {
+      it("Get a calendar when there is a calendar with the service id", () => {
+        const gtfs = new RawGtfs();
+        const serviceId = "service_id_1";
+        const calendar = TestFactory.createAndSetCalendar(gtfs, { service_id: serviceId });
+        expect(gtfs.getCalendar(serviceId)).toEqual(calendar);
+      });
+    });
+
+    describe("Test getNumberOfCalendars", () => {
+      it("Get the number of calendars when there are no calendars", () => {
+        const gtfs = new RawGtfs();
+        expect(gtfs.getNumberOfCalendars()).toBe(0);
+      });
+
+      it("Get the number of calendars when there are calendars", () => {
+        const gtfs = new RawGtfs();
+        const serviceId = "service_id_1";
+        TestFactory.createAndSetCalendar(gtfs, { service_id: serviceId });
+        expect(gtfs.getNumberOfCalendars()).toBe(1);
+      });
+    });
+    
+    describe("Test buildArrayOfCalendars", () => {
+      it("Build an array of calendars when there are no calendars", () => {
+        const gtfs = new RawGtfs();
+        expect(gtfs.buildArrayOfCalendars()).toEqual([]);
+      });
+
+      it("Build an array of calendars when there are calendars", () => {
+        const gtfs = new RawGtfs();
+        const serviceId1 = "service_id_1";
+        const serviceId2 = "service_id_2";
+        const calendar1 = TestFactory.createAndSetCalendar(gtfs, { service_id: serviceId1 });
+        const calendar2 = TestFactory.createAndSetCalendar(gtfs, { service_id: serviceId2 });
+        expect(gtfs.buildArrayOfCalendars()).toEqual([calendar1, calendar2]);
+      });
+    });
+
+    describe("Test updateCalendarServiceIdWithoutUpdatingReferences", () => {
+      it("Update a calendar service id without updating references", () => {
+        const gtfs = new RawGtfs();
+        const serviceId1 = "service_id_1";
+        const serviceId2 = "service_id_2";
+        const calendar1 = TestFactory.createAndSetCalendar(gtfs, { service_id: serviceId1 });
+        const calendar2 = TestFactory.createAndSetCalendar(gtfs, { service_id: serviceId2 });
+        expect(gtfs.buildArrayOfCalendars()).toEqual([calendar1, calendar2]);
+
+        const newServiceId1 = "new_service_id_1";
+        const newCalendar1 = {...calendar1, [GtfsCalendarField.ServiceId]: newServiceId1};
+        gtfs.updateCalendarServiceIdWithoutUpdatingReferences(serviceId1, newServiceId1);
+        console.log(gtfs.buildArrayOfCalendars())
+        expect(gtfs.buildArrayOfCalendars()).toEqual([calendar2, newCalendar1]);
+        expect(gtfs.getCalendar(serviceId1)).toBeUndefined();
+        expect(gtfs.getCalendar(newServiceId1)).toEqual(calendar1);
+      });
+    });
+
+    describe("Test deleteCalendarWithoutDeletingReferences", () => {
+      it("Delete a calendar without deleting references", () => {
+        const gtfs = new RawGtfs();
+        const serviceId = "service_id_1";
+        const calendar = TestFactory.createAndSetCalendar(gtfs, { service_id: serviceId });
+        expect(gtfs.getNumberOfCalendars()).toBe(1);
+
+        gtfs.deleteCalendarWithoutDeletingReferences(calendar);
+        expect(gtfs.getNumberOfCalendars()).toBe(0);
+        expect(gtfs.getCalendar(serviceId)).toBeUndefined();
+      });
+    });
+
+    describe("Test deleteCalendarServiceIdWithoutDeletingReferences", () => {
+      it("Delete a calendar service id without deleting references", () => {
+        const gtfs = new RawGtfs();
+        const serviceId = "service_id_1";
+        const calendar = TestFactory.createAndSetCalendar(gtfs, { service_id: serviceId });
+        expect(gtfs.getNumberOfCalendars()).toBe(1);
+
+        gtfs.deleteCalendarServiceIdWithoutDeletingReferences(serviceId);
+        expect(gtfs.getNumberOfCalendars()).toBe(0);
+        expect(gtfs.getCalendar(serviceId)).toBeUndefined();
+      });
+    });
+  });
+
+  describe("Test calendar_dates.txt related functions", () => {
+    describe("Test setCalendarDate", () => {
+      it("Set a calendar date", () => {
+        const gtfs = new RawGtfs();
+
+        const serviceId = "service_id_1";
+        const date = "20250101";
+        const calendarDate = TestFactory.createCalendarDate({ service_id: serviceId, date: date });
+        gtfs.setCalendarDate(calendarDate);
+        expect(gtfs.getCalendarDate(serviceId, date)).toEqual(calendarDate);
+      });
+    });
+
+    describe("Test setCalendarDates", () => {
+      it("Set calendar dates", () => {
+        const gtfs = new RawGtfs();
+        expect(gtfs.getNumberOfCalendarDates()).toBe(0);
+
+        const serviceId1 = "service_id_1";
+        const serviceId2 = "service_id_2";
+        const date1 = "20250101";
+        const date2 = "20250102";
+        const calendarDate1 = TestFactory.createCalendarDate({ service_id: serviceId1, date: date1 });
+        const calendarDate2 = TestFactory.createCalendarDate({ service_id: serviceId2, date: date2 });
+        const calendarDates = [calendarDate1, calendarDate2];
+        gtfs.setCalendarDates(calendarDates);
+        expect(gtfs.getNumberOfCalendarDates()).toBe(2);
+        expect(gtfs.getCalendarDate(serviceId1, date1)).toEqual(calendarDate1);
+        expect(gtfs.getCalendarDate(serviceId2, date2)).toEqual(calendarDate2);
+      });
+    });
+
+    describe("Test getCalendarDate", () => {
+      it("Get a calendar date", () => {
+        const gtfs = new RawGtfs();
+
+        const serviceId = "service_id_1";
+        const date = "20250101";
+        const calendarDate = TestFactory.createAndSetCalendarDate(gtfs, { service_id: serviceId, date: date });
+        expect(gtfs.getCalendarDate(serviceId, date)).toEqual(calendarDate);
+      });
+    });
+
+    describe("Test getNumberOfCalendarDates", () => {
+      it("Get the number of calendar dates", () => {
+        const gtfs = new RawGtfs();
+        expect(gtfs.getNumberOfCalendarDates()).toBe(0);
+
+        const serviceId = "service_id_1";
+        const date = "20250101";
+        TestFactory.createAndSetCalendarDate(gtfs, { service_id: serviceId, date: date });
+        expect(gtfs.getNumberOfCalendarDates()).toBe(1);
+      });
+    });
+
+    describe("Test buildArrayOfCalendarDates", () => {
+      it("Build an array of calendar dates", () => {
+        const gtfs = new RawGtfs();
+        expect(gtfs.buildArrayOfCalendarDates()).toEqual([]);
+      });
+
+      it("Build an array of calendar dates", () => {
+        const gtfs = new RawGtfs();
+        const serviceId = "service_id_1";
+        const date = "20250101";
+        const calendarDate = TestFactory.createAndSetCalendarDate(gtfs, { service_id: serviceId, date: date });
+        expect(gtfs.buildArrayOfCalendarDates()).toEqual([calendarDate]);
+      });
+    });
+
+    describe("Test updateCalendarDateServiceIdWithoutUpdatingReferences", () => {
+      it("Update a calendar date service id without updating references", () => {
+        const gtfs = new RawGtfs();
+        const serviceId = "service_id_1";
+        const date = "20250101";
+        const calendarDate = TestFactory.createAndSetCalendarDate(gtfs, { service_id: serviceId, date: date });
+        const newServiceId = "new_service_id_1";
+        gtfs.updateCalendarDateServiceIdWithoutUpdatingReferences(serviceId, newServiceId);
+        expect(gtfs.getCalendarDate(serviceId, date)).toBeUndefined();
+        expect(gtfs.getCalendarDate(newServiceId, date)).toEqual(calendarDate);
+      });
+    });
+
+    describe("Test deleteCalendarDateWithoutDeletingReferences", () => {
+      it("Delete a calendar date without deleting references", () => {
+        const gtfs = new RawGtfs();
+        const serviceId = "service_id_1";
+        const date = "20250101";
+        const calendarDate = TestFactory.createAndSetCalendarDate(gtfs, { service_id: serviceId, date: date });
+        gtfs.deleteCalendarDateWithoutDeletingReferences(calendarDate);
+        expect(gtfs.getCalendarDate(serviceId, date)).toBeUndefined();  
+      });
+    });
+  });
+
+  describe("Test shapes.txt related functions", () => {
+    describe("Test setShapePoint", () => {
+      it("Set a shape point", () => {
+        const gtfs = new RawGtfs();
+        expect(gtfs.getNumberOfShapePoints()).toBe(0);
+
+        const shapeId = "shape_id_1";
+        const shapePoint = TestFactory.createShapePoint({ shape_id: shapeId });
+        gtfs.setShapePoint(shapePoint);
+        expect(gtfs.getNumberOfShapePoints()).toBe(1);
+        expect(gtfs.getShapePoint(shapeId)).toEqual(shapePoint);
+      });
+    });
+
+    describe("Test setShapePoints", () => {
+      it("Set shape points", () => {
+        const gtfs = new RawGtfs();
+        expect(gtfs.getNumberOfShapePoints()).toBe(0);
+
+        const shapeId = "shape_id_1";
+        const shapePoint = TestFactory.createAndSetShapePoint(gtfs, { shape_id: shapeId });
+        expect(gtfs.getShapePoint(shapeId)).toEqual(shapePoint);
+      });
+    });
+
+    describe("Test getNumberOfShapePoints", () => {
+      it("Get the number of shape points", () => {
+        const gtfs = new RawGtfs();
+        expect(gtfs.getNumberOfShapePoints()).toBe(0);
+
+        const shapeId = "shape_id_1";
+        const shapePoint = TestFactory.createAndSetShapePoint(gtfs, { shape_id: shapeId });
+        expect(gtfs.getShapePoint(shapeId)).toEqual(shapePoint);
+        expect(gtfs.getNumberOfShapePoints()).toBe(1);
+      });
+    });
+
+    describe("Test buildArrayOfShapePoints", () => {
+      it("Build an array of shape points", () => {
+        const gtfs = new RawGtfs();
+        expect(gtfs.buildArrayOfShapePoints()).toEqual([]);
+
+        const shapeId = "shape_id_1";
+        const shapePoint = TestFactory.createAndSetShapePoint(gtfs, { shape_id: shapeId });
+        expect(gtfs.buildArrayOfShapePoints()).toEqual([shapePoint]);
+      });
+    });
+  });
+
+  describe("Test feed_info.txt related functions", () => {
+    describe("Test getFeedInfo", () => {
+      it("Get the feed info", () => {
+        const gtfs = new TestRawGtfs();
+        const feedInfo = gtfs.getFeedInfo();
+        expect(feedInfo?.[GtfsFeedInfoField.FeedPublisherName]).toEqual(gtfs.test_getDefaultFeedPublisherName());
+        expect(feedInfo?.[GtfsFeedInfoField.FeedPublisherUrl]).toEqual(gtfs.test_getDefaultFeedPublisherUrl());
+        expect(feedInfo?.[GtfsFeedInfoField.FeedLang]).toEqual(gtfs.test_getDefaultFeedLang());
+      });
+    });
+
+    describe("Test setFeedStartDate", () => {
+      it("Set the feed start date", () => {
+        const gtfs = new TestRawGtfs();
+        const feedStartDate = "20250101";
+        gtfs.setFeedStartDate(feedStartDate);
+        expect(gtfs.getFeedStartDate()).toEqual(feedStartDate);
+      });
+    });
+
+    describe("Test getFeedStartDate", () => {
+      it("Get the feed start date", () => {
+        const gtfs = new TestRawGtfs();
+        const feedStartDate = "20250101";
+        gtfs.setFeedStartDate(feedStartDate);
+        expect(gtfs.getFeedStartDate()).toEqual(feedStartDate);
+      });
+    });
+
+    describe("Test setFeedEndDate", () => {
+      it("Set the feed end date", () => {
+        const gtfs = new TestRawGtfs();
+        const feedEndDate = "20251231";
+        gtfs.setFeedEndDate(feedEndDate);
+        expect(gtfs.getFeedEndDate()).toEqual(feedEndDate);
+      });
+    });
+
+    describe("Test getFeedEndDate", () => {
+      it("Get the feed end date", () => {
+        const gtfs = new TestRawGtfs();
+        const feedEndDate = "20251231";
+        gtfs.setFeedEndDate(feedEndDate);
+        expect(gtfs.getFeedEndDate()).toEqual(feedEndDate);
+      });
+    });
+
+    describe("Test setFeedVersion", () => {
+      it("Set the feed version", () => {
+        const gtfs = new TestRawGtfs();
+        const feedVersion = "1.0";
+        gtfs.setFeedVersion(feedVersion);
+        expect(gtfs.getFeedVersion()).toEqual(feedVersion);
+      });
+    });
+
+    describe("Test getFeedVersion", () => {
+      it("Get the feed version", () => {
+        const gtfs = new TestRawGtfs();
+        const feedVersion = "1.0";
+        gtfs.setFeedVersion(feedVersion);
+        expect(gtfs.getFeedVersion()).toEqual(feedVersion);
+      });
+    });
+
+    describe("Test setFeedContactUrl", () => {
+      it("Set the feed contact url", () => {
+        const gtfs = new TestRawGtfs();
+        const feedContactUrl = "http://test.com";
+        gtfs.setFeedContactUrl(feedContactUrl);
+        expect(gtfs.getFeedContactUrl()).toEqual(feedContactUrl);
+      });
+    });
+
+    describe("Test getFeedContactUrl", () => {
+      it("Get the feed contact url", () => {
+        const gtfs = new TestRawGtfs();
+        const feedContactUrl = "http://test.com";
+        gtfs.setFeedContactUrl(feedContactUrl);
+        expect(gtfs.getFeedContactUrl()).toEqual(feedContactUrl);
+      });
+    });    
+  });
 });
