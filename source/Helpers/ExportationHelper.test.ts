@@ -3,8 +3,27 @@ import { RawGtfs4Testing } from "../RawGtfs4Testing";
 import { TestFactory } from "../TestHelpers/TestFactory";
 import { ExportationHelper4Testing } from "./ExportationHelper4Testing";
 import { GtfsAgencyFileName, GtfsAgencyFields, GtfsCalendarDate, GtfsCalendarDateFields, GtfsFeedInfoFileName, GtfsFileName, GtfsRouteFields, GtfsStopFields, GtfsStopFileName, GtfsStopTimeFields, GtfsTripFields, GtfsCalendarFileName, GtfsStopTimeFileName, GtfsTripFileName, GtfsRouteFileName, GtfsCalendarDateFileName, GtfsCalendarFields, GtfsFeedInfoFields } from "../RawGtfsTypes";
+import * as fs from "fs";
+import * as path from "path";
 
 describe("ExportationHelper", () => {
+  describe("Test exportToFolderAsFiles", () => {
+    it("With minimal GTFS", () => {
+      const gtfs = new RawGtfs4Testing();
+      const folderPath = "./temp-test-output/";
+      ExportationHelper4Testing.exportToFolderAsFiles(gtfs, folderPath);
+
+      const expectedFileByFileName = ExportationHelper4Testing.protected_buildFilesByFileName(gtfs);
+      for (const fileName in expectedFileByFileName) {
+        const fullPath = path.join(folderPath, fileName);
+        expect(fs.existsSync(fullPath)).toBe(true);
+        expect(fs.readFileSync(fullPath, "utf8")).toEqual(expectedFileByFileName[fileName]);
+      }
+
+      fs.rmSync(folderPath, { recursive: true, force: true });
+    });
+  });
+
   describe("Test escapeValue", () => {
     it("Simple value", () => {
       const value = "test";
@@ -61,7 +80,7 @@ describe("ExportationHelper", () => {
         [GtfsCalendarDateFileName]: GtfsCalendarDateFields.join(",") + "\n",
         [GtfsFeedInfoFileName]: GtfsFeedInfoFields.join(",") + "\n" + `${defaultFeedPublisherName},${defaultFeedPublisherUrl},${defaultFeedLang}` + GtfsFeedInfoFields.slice(3).map(_ => ",").join(""),
       };
-      console.log(fileByFileName)
+      
       expect(fileByFileName).toEqual(expectedFileByFileName);
     });
   });

@@ -14,11 +14,21 @@ import {
 } from "../RawGtfsTypes";
 import * as fs from "fs";
 import * as path from "path";
+import * as AdmZip from "adm-zip";
 
 export class ExportationHelper {
-    public static exportToFolderAsFiles(gtfs: RawGtfs, folderPath: string) {
-      const fileByFileName = this.buildFilesByFileName(gtfs);
-      fs.mkdirSync(folderPath, { recursive: true });
+  public static exportAsZipFile(gtfs: RawGtfs, zipFilePath: string) {
+    const fileByFileName = this.buildFilesByFileName(gtfs);
+    const zip = new AdmZip();
+    for (const fileName in fileByFileName) {
+      zip.addFile(fileName, fileByFileName[fileName]);
+    }
+    zip.writeZip(zipFilePath);
+  }
+
+  public static exportToFolderAsFiles(gtfs: RawGtfs, folderPath: string) {
+    const fileByFileName = this.buildFilesByFileName(gtfs);
+    fs.mkdirSync(folderPath, { recursive: true });
 
       for (const fileName in fileByFileName) {
         const fullPath = path.join(folderPath, fileName);

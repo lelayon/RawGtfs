@@ -5,12 +5,6 @@ import { TestFactory } from "./TestHelpers/TestFactory";
 import { RawGtfs4Testing } from "./RawGtfs4Testing";
 
 describe("Test RawGtfs Class", () => {
-  it("should create a new RawGtfs instance", () => {
-    const gtfs = new RawGtfs();
-    expect(gtfs).toBeDefined();
-    gtfs.exportToFolderAsFiles('./test/')
-  });
-
   describe("Test agency.txt related functions", () => {
     describe("Test setAgency", () => {
       it("Set an agency when cardinality is Absent", () => {
