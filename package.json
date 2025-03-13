@@ -1,8 +1,9 @@
 {
-  "name": "raw-gtfs-class",
+  "name": "@lelayon/rawgtfs",
   "version": "1.0.0",
-  "description": "A class to handle GTFS data",
   "main": "index.js",
+  "license": "MIT",
+  "description": "A package for working with raw GTFS data",
   "scripts": {
     "test": "jest",
     "run": "ts-node source/gpxtests/Gpx2DraftGtfs.ts"
