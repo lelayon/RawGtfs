@@ -446,6 +446,10 @@ export class RawGtfs {
     return everydayCalendar;
   }
 
+  public setEverydayCalendar(partialCalendar: Partial<GtfsCalendar>) {
+    this.setAndGetEverydayCalendar(partialCalendar);
+  }
+
   public getCalendar(serviceId: string) {
     return this.calendarByServiceId.get(serviceId);
   }
